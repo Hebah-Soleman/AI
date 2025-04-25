@@ -1,0 +1,38 @@
+from fastapi import FastAPI, File, UploadFile, Form, Request
+from pydantic import BaseModel
+from service.ai_manager import AiManager
+
+app = FastAPI()
+ai = AiManager()
+
+class Prompt(BaseModel):
+    prompt: str
+    summary: str = ""
+
+@app.post("/chat/")
+def chat(data: Prompt):
+    response = ai.send_chat(data.prompt, data.summary)
+    return {"response": response}
+
+@app.post("/summarize/")
+def summarize(data: Prompt):
+    summary = ai.summarize_and_store(data.summary, data.prompt, "Chibi’s response here...")
+    return {"summary": summary}
+
+@app.post("/tts/")
+def speech(text: str = Form(...)):
+    mp3 = ai.tts(text)
+    return {"message": "Audio generated", "length": len(mp3)}
+
+@app.post("/stt/")
+def stt(file: UploadFile = File(...)):
+    path = f".\{file.filename}"
+    with open(path, "wb") as f:
+        f.write(file.file.read())
+    text = ai.stt(path)
+    return {"transcription": text}
+
+@app.post("/image/")
+def image(prompt: str = Form(...)):
+    url = ai.generate_image(prompt)
+    return {"image_url": url}
