@@ -34,7 +34,7 @@ class AiManager:
         res.raise_for_status()
         return res.json()["choices"][0]["message"]["content"]
 
-    def u7(self, prompt: str, summary: str = "") -> str:
+    def send_chat(self, prompt: str, summary: str = "") -> str:
         memory = f'Use this memory:\n"{summary}". ' if summary else ""
         messages = [
             {"role": "system", "content": memory + "You are Chibi..."},
